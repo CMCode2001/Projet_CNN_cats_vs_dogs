@@ -1,0 +1,19 @@
+# Common
+node_modules/
+venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/data/
+# backend/model/*.keras # Inclus par défaut si présent, décommentez pour ignorer
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local

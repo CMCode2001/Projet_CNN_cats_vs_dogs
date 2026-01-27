@@ -1,0 +1,12 @@
+tensorflow
+fastapi
+uvicorn
+python-multipart
+pillow
+numpy
+scipy
+streamlit
+requests
+python-dotenv
+pandas
+streamlit-option-menu
