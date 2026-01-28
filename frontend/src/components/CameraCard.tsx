@@ -1,8 +1,9 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { StopCircle, CameraIcon, X } from 'lucide-react'
+import { StopCircle, CameraIcon, X, RefreshCw } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
+import Webcam from 'react-webcam'
 
 interface CameraCardProps {
     onImageSelect: (file: File) => void;
@@ -11,122 +12,45 @@ interface CameraCardProps {
 }
 
 export function CameraCard({ onImageSelect, isUploading = false, onClose }: CameraCardProps) {
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const webcamRef = useRef<Webcam>(null)
     const [isActive, setIsActive] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [stream, setStream] = useState<MediaStream | null>(null)
-    const [debugInfo, setDebugInfo] = useState<string>("En attente...")
-    // Effet pour lier le flux à la balise vidéo dès qu'elle est disponible
-    useEffect(() => {
-        if (isActive && stream && videoRef.current) {
-            const video = videoRef.current;
-            setDebugInfo("Liaison flux + forçage attributs...");
-            
-            // Forçage critique pour iOS/Android
-            video.setAttribute('playsinline', '');
-            video.setAttribute('muted', '');
-            video.setAttribute('autoplay', '');
-            video.muted = true;
-            
-            video.srcObject = stream;
-            
-            const attemptPlay = () => {
-                video.play()
-                    .then(() => setDebugInfo("✅ Lecture active !"))
-                    .catch(e => {
-                        setDebugInfo(`⚠️ Retentative... (${e.message})`);
-                        // Retenter après un court délai (parfois nécessaire sur mobile)
-                        setTimeout(attemptPlay, 1000);
-                    });
-            };
+    const [facingMode, setFacingMode] = useState<"user" | "environment">("environment")
+    const [isCameraReady, setIsCameraReady] = useState(false)
 
-            video.onloadedmetadata = () => {
-                setDebugInfo("Métadonnées OK, démarrage...");
-                attemptPlay();
-            };
-        }
-    }, [isActive, stream]);
-
-    const startCamera = useCallback(async () => {
-        setDebugInfo("Démarrage caméra...");
-        
-        try {
-            setError(null);
-            const constraints = { 
-                video: { 
-                    facingMode: 'environment',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                },
-                audio: false // S'assurer que l'audio n'est pas demandé
-            };
-
-            const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-            setStream(mediaStream);
-            setIsActive(true);
-            setDebugInfo("Flux reçu, attente affichage...");
-        } catch (err: any) {
-            console.error("Caméra error:", err);
-            setDebugInfo(`Erreur: ${err.message}`);
-            
-            // Fallback total
-            try {
-                const fallback = await navigator.mediaDevices.getUserMedia({ video: true });
-                setStream(fallback);
-                setIsActive(true);
-            } catch (e) {
-                setError("Accès caméra refusé.");
-            }
-        }
-    }, []);
-
-    const stopCamera = useCallback(() => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop())
-            setStream(null)
-        }
-        setIsActive(false)
-    }, [stream])
+    const videoConstraints = {
+        width: 1280,
+        height: 720,
+        facingMode: facingMode
+    }
 
     const capturePhoto = useCallback(() => {
-        if (videoRef.current && canvasRef.current) {
-            const video = videoRef.current
-            const canvas = canvasRef.current
-            const context = canvas.getContext('2d')
-
-            if (context) {
-                canvas.width = video.videoWidth
-                canvas.height = video.videoHeight
-                context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" })
-                        onImageSelect(file)
-                        stopCamera()
-                    }
-                }, 'image/jpeg', 0.9)
-            }
+        const imageSrc = webcamRef.current?.getScreenshot()
+        if (imageSrc) {
+            // Convert base64 to blob
+            fetch(imageSrc)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" })
+                    onImageSelect(file)
+                    setIsActive(false)
+                })
         }
-    }, [onImageSelect, stopCamera])
+    }, [onImageSelect])
 
-    useEffect(() => {
-        return () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop())
-            }
-        }
-    }, [stream])
+    const toggleCamera = () => {
+        setFacingMode(prev => prev === "user" ? "environment" : "user")
+        setIsCameraReady(false)
+    }
 
     return (
         <Card className="glass-card w-full max-w-md mx-auto overflow-hidden border-0 relative group">
             <CardContent className="p-0">
-                <div className="relative flex flex-col items-center justify-center w-full h-80 bg-black/40 overflow-hidden rounded-xl border-2 border-dashed border-white/10 group-hover:border-primary/50 transition-all duration-300">
+                <div className="relative flex flex-col items-center justify-center w-full h-80 bg-black/60 overflow-hidden rounded-xl border-2 border-dashed border-white/10 group-hover:border-primary/50 transition-all duration-300">
                     
                     {onClose && (
                         <button 
-                            onClick={(e) => { e.stopPropagation(); stopCamera(); onClose(); }}
+                            onClick={(e) => { e.stopPropagation(); setIsActive(false); onClose(); }}
                             className="absolute top-2 right-2 z-30 p-2 bg-black/50 hover:bg-destructive text-white rounded-full transition-colors"
                         >
                             <X size={20} />
@@ -146,12 +70,15 @@ export function CameraCard({ onImageSelect, isUploading = false, onClose }: Came
                                     <CameraIcon size={40} />
                                 </div>
                                 <div className="space-y-2 text-center">
-                                    <h3 className="font-semibold text-lg">Mode Caméra</h3>
+                                    <h3 className="font-semibold text-lg">Mode Caméra Pro</h3>
                                     <p className="text-sm text-muted-foreground">
-                                        Prenez une photo en direct de votre animal
+                                        Utilisez react-webcam pour une capture robuste
                                     </p>
                                 </div>
-                                <Button onClick={startCamera} className="rounded-full px-8 bg-primary hover:bg-primary/90">
+                                <Button 
+                                    onClick={() => setIsActive(true)} 
+                                    className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                                >
                                     Activer la caméra
                                 </Button>
                                 {error && <p className="text-xs text-destructive mt-2">{error}</p>}
@@ -164,47 +91,68 @@ export function CameraCard({ onImageSelect, isUploading = false, onClose }: Came
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className="relative w-full h-full"
                             >
-                                <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
-                                     <div className="flex items-center gap-2">
-                                         <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                         <span className="text-[10px] uppercase font-bold text-white tracking-widest drop-shadow-md">LIVE</span>
-                                     </div>
-                                     <div className="px-2 py-1 bg-black/60 rounded text-[9px] text-white/80 font-mono backdrop-blur-sm max-w-[200px] truncate">
-                                         {debugInfo}
-                                     </div>
-                                </div>
-                                
-                                <video 
-                                    ref={videoRef} 
-                                    autoPlay 
-                                    playsInline 
-                                    muted 
+                                <Webcam
+                                    audio={false}
+                                    ref={webcamRef}
+                                    screenshotFormat="image/jpeg"
+                                    videoConstraints={videoConstraints}
+                                    onUserMedia={() => setIsCameraReady(true)}
+                                    onUserMediaError={(err) => {
+                                        console.error("Webcam Error:", err)
+                                        setError("Erreur caméra : " + (err as string))
+                                    }}
                                     className="w-full h-full object-cover"
+                                    forceScreenshotSourceSize={true}
                                 />
                                 
-                                <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 px-4 z-20">
-                                    <Button 
-                                        onClick={capturePhoto} 
-                                        className="rounded-full w-14 h-14 p-0 bg-white hover:bg-gray-100 text-primary transition-transform active:scale-90 shadow-xl"
-                                        title="Prendre la photo"
-                                    >
-                                        <div className="w-10 h-10 rounded-full border-4 border-primary/20" />
-                                    </Button>
-                                    
-                                    <Button 
-                                        onClick={stopCamera} 
-                                        variant="secondary"
-                                        className="rounded-full w-14 h-14 p-0 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm border-0"
-                                        title="Annuler"
-                                    >
-                                        <StopCircle size={24} />
-                                    </Button>
-                                </div>
+                                {isCameraReady && (
+                                    <>
+                                        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 px-4 z-20">
+                                            <Button 
+                                                onClick={capturePhoto} 
+                                                className="rounded-full w-14 h-14 p-0 bg-white hover:bg-gray-100 text-primary transition-transform active:scale-90 shadow-xl"
+                                            >
+                                                <div className="w-10 h-10 rounded-full border-4 border-primary/20" />
+                                            </Button>
+                                            
+                                            <Button 
+                                                onClick={toggleCamera} 
+                                                className="rounded-full w-14 h-14 p-0 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm border-0"
+                                                title="Inverser la caméra"
+                                            >
+                                                <RefreshCw size={24} />
+                                            </Button>
+
+                                            <Button 
+                                                onClick={() => setIsActive(false)} 
+                                                variant="secondary"
+                                                className="rounded-full w-14 h-14 p-0 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm border-0"
+                                            >
+                                                <StopCircle size={24} />
+                                            </Button>
+                                        </div>
+                                        
+                                        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+                                             <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                             <span className="text-[10px] uppercase font-bold text-white tracking-widest drop-shadow-md">LIVE PRO</span>
+                                        </div>
+                                    </>
+                                )}
+
+                                {!isCameraReady && (
+                                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-4 text-white z-10 text-center px-4">
+                                        <motion.div 
+                                            animate={{ rotate: 360 }}
+                                            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                                        >
+                                            <RefreshCw size={32} className="text-primary" />
+                                        </motion.div>
+                                        <p className="text-sm font-medium">Initialisation de la caméra...</p>
+                                    </div>
+                                )}
                             </motion.div>
                         )}
                     </AnimatePresence>
-
-                    <canvas ref={canvasRef} className="hidden" />
 
                     {isUploading && (
                          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-40 flex items-center justify-center rounded-xl">
