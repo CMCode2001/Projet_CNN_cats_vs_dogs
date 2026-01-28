@@ -29,20 +29,20 @@ export function VirtualGallery({ onSelect, isLoading }: VirtualGalleryProps) {
     }
 
     return (
-        <div className="w-full space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider text-left pl-2">
-                Galerie de Test
-            </h3>
-            <div className="grid grid-cols-3 gap-4">
+        <div className="w-full space-y-3">
+            {/* <h3 className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] text-center lg:text-left lg:pl-1">
+                Test Express
+            </h3> */}
+            <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
                 {galleryImages.map((image, index) => (
                     <motion.div
                         key={index}
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.2)" }}
                         whileTap={{ scale: 0.95 }}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`group relative aspect-square rounded-xl overflow-hidden border-2 border-white/10 cursor-pointer bg-secondary/30 backdrop-blur-sm ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                        className={`group relative aspect-square lg:h-24 lg:w-24 mx-auto rounded-xl overflow-hidden border border-white/10 cursor-pointer bg-black/20 backdrop-blur-sm transition-colors ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
                         onClick={() => handleSelectImage(image.src, image.filename)}
                     >
                         <img 
@@ -51,14 +51,11 @@ export function VirtualGallery({ onSelect, isLoading }: VirtualGalleryProps) {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span className="text-white text-xs font-bold uppercase tracking-widest">{image.name}</span>
+                            <span className="text-[10px] text-white font-black uppercase tracking-widest">{image.name}</span>
                         </div>
                     </motion.div>
                 ))}
             </div>
-            <p className="text-[10px] text-muted-foreground/60 italic text-center">
-                Cliquez sur une image pour tester la prédiction instantanément.
-            </p>
         </div>
     )
 }

@@ -6,7 +6,6 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
   CardFooter,
 } from "./ui/card"
@@ -42,14 +41,14 @@ export function PredictionCard({ prediction, onReset }: PredictionCardProps) {
   // Utiliser la prédiction actuelle ou la précédente pour les animations de sortie
   const displayPrediction = prediction || previousPrediction.current
 
-  if (!displayPrediction) return null
+  if (!displayPrediction || !displayPrediction.label) return null
 
   const label = displayPrediction.label.toLowerCase()
   const isDog = label === "dog"
   const isCat = label === "cat"
   const isUnknown = label === "unknown"
 
-  const confidencePercentage = Math.round(displayPrediction.confidence * 100)
+  const confidencePercentage = displayPrediction.confidence ? Math.round(displayPrediction.confidence * 100) : 0
 
   // Déterminer les styles et le contenu en fonction du résultat
   let badgeVariant: "success" | "info" | "destructive" = "info"
@@ -85,45 +84,36 @@ export function PredictionCard({ prediction, onReset }: PredictionCardProps) {
     <AnimatePresence mode="popLayout">
       {prediction && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="w-full max-w-md mx-auto"
+          className="w-full max-w-[95vw] md:max-w-md mx-auto"
         >
           <Card className="glass-card border-t-4 border-t-primary overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none select-none">
-                 {/* {isDog && <span className="text-9xl">🐶</span>}
-                 {isCat && <span className="text-9xl">🐱</span>}
-                 {isUnknown && <span className="text-9xl">❓</span>} */}
-            </div>
-            
-            <CardHeader className="relative z-10 pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl font-bold flex items-center gap-2">
-                  Résultat de la prédiction
+            <CardHeader className="relative z-10 pb-2 px-4 md:px-6">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="text-lg md:text-xl font-bold flex items-center gap-2 truncate">
+                  Résultat
                 </CardTitle>
                 <Badge 
                     variant={badgeVariant}
-                    className="text-sm px-3 py-1 uppercase tracking-wide"
+                    className="text-xs md:text-sm px-2 md:px-3 py-1 uppercase tracking-wide shrink-0"
                 >
                     {displayLabel}
                 </Badge>
               </div>
-              <CardDescription>
-                Analyse par Deep Learning terminée
-              </CardDescription>
             </CardHeader>
             
-            <CardContent className="space-y-6 relative z-10">
-              <div className="flex flex-col items-center justify-center p-6 bg-secondary/50 rounded-xl backdrop-blur-sm shadow-inner">
+            <CardContent className="space-y-4 md:space-y-6 relative z-10 px-4 md:px-6">
+              <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-secondary/50 rounded-xl backdrop-blur-sm shadow-inner">
                 
                 {/* Petit Card pour le GIF */}
                 {gif && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 overflow-hidden rounded-lg border border-white/20 shadow-sm w-32 h-32"
+                    className="mb-4 overflow-hidden rounded-lg border border-white/20 shadow-sm w-24 h-24 md:w-32 md:h-32"
                   >
                     <img src={gif} alt="Result GIF" className="w-full h-full object-cover" />
                   </motion.div>
@@ -140,38 +130,41 @@ export function PredictionCard({ prediction, onReset }: PredictionCardProps) {
                   </motion.div>
                 )}
                 
-                <h2 className={`text-3xl font-extrabold tracking-tight mb-2 capitalize bg-clip-text text-transparent bg-gradient-to-r ${colorClass}`}>
+                <h2 className={`text-2xl md:text-3xl font-extrabold tracking-tight mb-2 capitalize text-center bg-clip-text text-transparent bg-gradient-to-r ${colorClass}`}>
                   {message} !
                 </h2>
                 
-                {/* <p className="text-muted-foreground text-center">
-                  D'après les caractéristiques visuelles, l'IA est
-                  <strong className="text-foreground mx-1">{confidencePercentage}%</strong>
-                  confiante.
-                </p> */}
                 {isUnknown && displayPrediction.reason && (
-                    <p className="text-xs text-white dark:text-white mt-2 bg-red-500/20 dark:bg-red-500/20 px-3 py-1 rounded-full">
+                    <p className="text-[10px] md:text-xs text-white dark:text-white mt-1 bg-red-500/20 px-3 py-1 rounded-full text-center">
                         Raison: {displayPrediction.reason === "stability" ? "Instabilité visuelle" : "Faible confiance"}
                     </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-sm font-medium">
+                <div className="flex justify-between text-xs md:text-sm font-medium">
                   <span>Score de confiance</span>
                   <span>{confidencePercentage}%</span>
                 </div>
-                <Progress value={confidencePercentage} className="h-3" />
-                <p className="text-xs text-muted-foreground text-right pt-1">
-                   Seuil strict: 98%
-                </p>
+                <Progress value={confidencePercentage} className="h-2 md:h-3" />
               </div>
             </CardContent>
             
-            <CardFooter className="relative z-10 bg-secondary/20 pt-6">
-              <Button onClick={onReset} variant="outline" className="w-full hover:bg-background transition-colors">
-                Scanner une autre image
-              </Button>
+            <CardFooter className="relative z-10 bg-secondary/20 py-4 flex justify-center px-4">
+              <motion.div
+                whileHover={{ scale: 1.05, filter: "brightness(1.1)" }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="w-full flex justify-center"
+              >
+                <Button 
+                  onClick={onReset} 
+                  variant="outline" 
+                  className="w-full md:w-fit px-8 h-10 md:h-12 text-xs md:text-sm cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-lg shadow-blue-500/20 border-0 transition-all duration-300"
+                >
+                  Scanner une autre image
+                </Button>
+              </motion.div>
             </CardFooter>
           </Card>
         </motion.div>

@@ -112,10 +112,12 @@
   }
   .dark body {
     background-image: 
-      radial-gradient(at 0% 0%, hsla(0,0%,15%,1) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(0,0%,12%,1) 0, transparent 50%), 
-      radial-gradient(at 100% 0%, hsla(0,0%,15%,1) 0, transparent 50%);
-    background-color: hsl(var(--background));
+      radial-gradient(at 50% 50%, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%),
+      url("./assets/background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #0c0c0c;
   }
   .light body {
     background-image: 

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import sys
@@ -17,6 +17,7 @@ app = FastAPI(title="Dogs vs Cats Classifier API")
 
 # Configure CORS
 origins = [
+    "http://localhost",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
@@ -40,11 +41,20 @@ model = None
 @app.on_event("startup")
 def startup_event():
     global model
+    print(f"DEBUG: Starting application... BASE_DIR: {BASE_DIR}")
+    print(f"DEBUG: Looking for model at: {MODEL_PATH}")
+    if os.path.exists(MODEL_PATH):
+        print(f"DEBUG: Model file found! Size: {os.path.getsize(MODEL_PATH)} bytes")
+    else:
+        print(f"DEBUG: CRITICAL - Model file NOT found at {MODEL_PATH}")
+        
     try:
         model = load_trained_model(MODEL_PATH)
-        print("Model loaded successfully")
+        print("DEBUG: Model loaded successfully")
     except Exception as e:
-        print(f"Error loading model: {e}")
+        print(f"DEBUG: CRITICAL - Error loading model: {e}")
+        import traceback
+        traceback.print_exc()
 
 @app.get("/")
 def read_root():
@@ -53,11 +63,11 @@ def read_root():
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     if model is None:
-        return {"error": "Model not loaded"}
+        raise HTTPException(status_code=500, detail="Modèle non chargé sur le serveur.")
     
     image_bytes = await file.read()
     prediction = get_prediction(model, image_bytes)
-    
+    print(f"Prediction result: {prediction}")
     return prediction
 
 if __name__ == "__main__":

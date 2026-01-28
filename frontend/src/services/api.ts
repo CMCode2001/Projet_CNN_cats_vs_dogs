@@ -16,9 +16,10 @@ export const predictImage = async (file: File) => {
     try {
         const response = await api.post('/predict', formData);
         return response.data;
-    } catch (error) {
-        console.error("Prediction Error:", error);
-        throw error;
+    } catch (error: any) {
+        const message = error.response?.data?.detail || error.message || "Erreur réseau";
+        console.error("Prediction Error:", message, error);
+        throw new Error(message);
     }
 };
 
