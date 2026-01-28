@@ -1,77 +1,86 @@
-# Dogs vs Cats Classifier - Deep Learning Project CNN
+# 🐾 Dogs vs Cats Classifier - AI Deep Learning Project
 
-Ce projet est un classificateur d'images (chiens vs chats) utilisant un modèle de Réseau de Neurones Convolutifs (CNN) entraîné avec TensorFlow/Keras. L'application dispose d'une interface web moderne et d'une API FastAPI performante.
+![AI Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
+![Tech Stack](https://img.shields.io/badge/Stack-React%20%7C%20FastAPI%20%7C%20TensorFlow-blue?style=for-the-badge)
 
-**Master UIDT - Projet Deep Learning CNN**
-
-## 🚀 Fonctionnalités
-- **Classification instantanée** : Identifiez si une image contient un chien ou un chat.
-- **Interface Premium** : Design futuriste "Glassmorphism" avec mode sombre (style ChatGPT Carbon).
-- **Galerie de Test** : Testez le modèle rapidement avec des exemples pré-chargés.
-- **Test Time Augmentation (TTA)** : Analyse robuste utilisant plusieurs angles de l'image.
-- **Détection d'Inconnu** : Le modèle identifie s'il est incertain ou si l'image ne correspond pas.
+Une application web moderne et ultra-performante utilisant le Deep Learning pour classifier instantanément les images de chiens et de chats. Ce projet a été développé dans le cadre du projet Deep Learning du **Master 2 GL UIDT**.
 
 ---
 
-## 🛠️ Installation et Lancement (De A à Z)
+## 🌟 Fonctionnalités
 
-### Option 1 : Utilisation de Docker (Recommandé)
-C'est la méthode la plus simple pour lancer tout l'écosystème en une commande.
-
-1. **Prérequis** : Avoir Docker et Docker Compose installés.
-2. **Lancement** :
-   ```bash
-   docker-compose up --build
-   ```
-3. **Accès** :
-   - Frontend : [http://localhost](http://localhost)
-   - API Backend : [http://localhost:8000](http://localhost:8000)
+- **🧠 Deep Learning CNN** : Modèle entraîné sur des milliers d'images pour une précision optimale.
+- **📸 Mode Caméra Pro** : Prenez une photo directement depuis votre mobile ou webcam pour une analyse en temps réel.
+- **📁 Drag & Drop Intelligent** : Interface fluide pour glisser-déposer vos fichiers images.
+- **🖼️ Galerie de Test** : Images d'exemple prêtes à être testées d'un simple clic.
+- **🌓 Mode Sombre/Clair** : Interface premium avec glassmorphism et animations fluides.
+- **📱 Responsive Design** : Optimisée pour ordinateurs, tablettes et smartphones.
 
 ---
 
-### Option 2 : Installation Locale (Développement)
+## 🛠️ Architecture Technique
 
-#### 1. Configuration du Backend (FastAPI)
-- Allez dans le dossier backend : `cd backend`
-- Créez un environnement virtuel : `python -m venv venv`
-- Activez-le : 
-  - Windows : `venv\Scripts\activate`
-  - Linux/Mac : `source venv/bin/activate`
-- Installez les dépendances : `pip install -r requirements.txt`
-- Assurez-vous que votre modèle est dans `backend/model/model.keras`.
-- Lancez l'API : `uvicorn api.api:app --reload --port 8000`
+### Backend (API IA)
+- **Framework** : FastAPI (Python 3.11)
+- **Modèle** : Réseau de neurones convolutif (CNN) via TensorFlow/Keras.
+- **Prétraitement** : Optimisation des images à la volée avant prédiction.
+- **CORS** : Entièrement configuré pour les déploiements multi-origines.
 
-#### 2. Configuration du Frontend (React + Vite)
-- Allez dans le dossier frontend : `cd frontend`
-- Installez les dépendances : `npm install`
-- Lancez le serveur de développement : `npm run dev`
-- Accédez à l'application sur [http://localhost:5173](http://localhost:5173)
+### Frontend (Application Web)
+- **Framework** : React 19 + Vite + TypeScript.
+- **Styling** : Tailwind CSS 4.0.
+- **Animations** : Framer Motion (Transitions fluides et interactives).
+- **Composants UI** : Shadcn/UI (Design premium).
+- **Caméra** : Intégration robuste avec `react-webcam`.
 
 ---
 
-## 📂 Structure du Projet
+## 🚀 Installation Locale
 
-```text
-dogs-cats-classifier/
-├── backend/
-│   ├── api/                # Code de l'API FastAPI
-│   ├── model/              # Modèle .keras entraîné
-│   ├── requirements.txt    # Dépendances Python
-│   └── Dockerfile          # Configuration Docker Backend
-├── frontend/
-│   ├── src/                # Code source React (TSX)
-│   ├── assets/             # Images et GIFs
-│   ├── package.json        # Dépendances Node.js
-│   └── Dockerfile          # Configuration Docker Frontend (Nginx)
-├── docker-compose.yml       # Orchestration des services
-└── README.md               # Ce fichier
+### 1. Cloner le projet
+```bash
+git clone https://github.com/CMCode2001/Projet_CNN_cats_vs_dogs.git
+cd dogs-cats-classifier
 ```
 
-## 🧠 Modèle et Analyse
-Le backend utilise un modèle **EfficientNetB0** (ou CNN personnalisé) pour la classification. 
-- **Seuil de confiance** : 98% pour garantir la précision.
-- **Réduction du bruit** : Utilisation de la moyenne de 3 transformations d'image (Original, Miroir, Zoom) pour une prédiction stabilisée.
+### 2. Lancer avec Docker (Recommandé)
+Le projet est entièrement conteneurisé. Pour lancer le frontend et le backend simultanément :
+```bash
+docker-compose up --build
+```
+L'application sera accessible sur `http://localhost`.
 
-## 👥 Auteur
-Projet réalisé dans le cadre du **Master UIDT**.
-Deep Learning Project CNN.
+### 3. Installation manuelle (Sans Docker)
+
+**Backend :**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Sur Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn api.api:app --reload
+```
+
+**Frontend :**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+
+---
+
+## 👥 Équipe du Projet
+- **Cheikh Mbacke COLY**
+- **Bassirou KANE**
+- **Mouhamet DIAGNE**
+
+**Cours** : Deep Learning - Master 2 GL UIDT  
+**Sujet** : Classification d'images par Réseaux de Neurones Convolutifs (CNN)
+
+---
+
+## 📄 Licence
+Ce projet est développé pour un usage éducatif. 
+
