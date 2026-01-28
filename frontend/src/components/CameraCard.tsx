@@ -16,41 +16,67 @@ export function CameraCard({ onImageSelect, isUploading = false, onClose }: Came
     const [isActive, setIsActive] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [stream, setStream] = useState<MediaStream | null>(null)
-
+    const [debugInfo, setDebugInfo] = useState<string>("En attente...")
     // Effet pour lier le flux à la balise vidéo dès qu'elle est disponible
     useEffect(() => {
         if (isActive && stream && videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.play().catch(err => {
-                console.error("Erreur lecture vidéo:", err);
-                // Si la lecture automatique échoue, on affiche l'erreur
-                setError("Cliquez à nouveau sur Activer pour forcer la vidéo.");
-            });
+            const video = videoRef.current;
+            setDebugInfo("Liaison flux + forçage attributs...");
+            
+            // Forçage critique pour iOS/Android
+            video.setAttribute('playsinline', '');
+            video.setAttribute('muted', '');
+            video.setAttribute('autoplay', '');
+            video.muted = true;
+            
+            video.srcObject = stream;
+            
+            const attemptPlay = () => {
+                video.play()
+                    .then(() => setDebugInfo("✅ Lecture active !"))
+                    .catch(e => {
+                        setDebugInfo(`⚠️ Retentative... (${e.message})`);
+                        // Retenter après un court délai (parfois nécessaire sur mobile)
+                        setTimeout(attemptPlay, 1000);
+                    });
+            };
+
+            video.onloadedmetadata = () => {
+                setDebugInfo("Métadonnées OK, démarrage...");
+                attemptPlay();
+            };
         }
     }, [isActive, stream]);
 
     const startCamera = useCallback(async () => {
+        setDebugInfo("Démarrage caméra...");
+        
         try {
             setError(null);
-            // On demande d'abord les permissions avec des contraintes simples
-            const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+            const constraints = { 
                 video: { 
-                    facingMode: 'environment', // Caméra arrière
+                    facingMode: 'environment',
                     width: { ideal: 1280 },
                     height: { ideal: 720 }
-                } 
-            });
+                },
+                audio: false // S'assurer que l'audio n'est pas demandé
+            };
+
+            const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
             setStream(mediaStream);
             setIsActive(true);
+            setDebugInfo("Flux reçu, attente affichage...");
         } catch (err: any) {
-            console.error("Erreur d'accès à la caméra:", err);
-            // Fallback si 'environment' échoue (certains navigateurs desktop)
+            console.error("Caméra error:", err);
+            setDebugInfo(`Erreur: ${err.message}`);
+            
+            // Fallback total
             try {
-                const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                setStream(fallbackStream);
+                const fallback = await navigator.mediaDevices.getUserMedia({ video: true });
+                setStream(fallback);
                 setIsActive(true);
-            } catch (fallbackErr) {
-                setError("Impossible d'accéder à la caméra. Vérifiez les permissions HTTPS.");
+            } catch (e) {
+                setError("Accès caméra refusé.");
             }
         }
     }, []);
@@ -138,6 +164,16 @@ export function CameraCard({ onImageSelect, isUploading = false, onClose }: Came
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className="relative w-full h-full"
                             >
+                                <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                                     <div className="flex items-center gap-2">
+                                         <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                         <span className="text-[10px] uppercase font-bold text-white tracking-widest drop-shadow-md">LIVE</span>
+                                     </div>
+                                     <div className="px-2 py-1 bg-black/60 rounded text-[9px] text-white/80 font-mono backdrop-blur-sm max-w-[200px] truncate">
+                                         {debugInfo}
+                                     </div>
+                                </div>
+                                
                                 <video 
                                     ref={videoRef} 
                                     autoPlay 
@@ -163,11 +199,6 @@ export function CameraCard({ onImageSelect, isUploading = false, onClose }: Came
                                     >
                                         <StopCircle size={24} />
                                     </Button>
-                                </div>
-                                
-                                <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-                                     <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                     <span className="text-[10px] uppercase font-bold text-white tracking-widest drop-shadow-md">LIVE</span>
                                 </div>
                             </motion.div>
                         )}
