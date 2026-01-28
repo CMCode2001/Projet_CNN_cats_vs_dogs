@@ -17,22 +17,43 @@ export function CameraCard({ onImageSelect, isUploading = false, onClose }: Came
     const [error, setError] = useState<string | null>(null)
     const [stream, setStream] = useState<MediaStream | null>(null)
 
+    // Effet pour lier le flux à la balise vidéo dès qu'elle est disponible
+    useEffect(() => {
+        if (isActive && stream && videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play().catch(err => {
+                console.error("Erreur lecture vidéo:", err);
+                // Si la lecture automatique échoue, on affiche l'erreur
+                setError("Cliquez à nouveau sur Activer pour forcer la vidéo.");
+            });
+        }
+    }, [isActive, stream]);
+
     const startCamera = useCallback(async () => {
         try {
-            setError(null)
+            setError(null);
+            // On demande d'abord les permissions avec des contraintes simples
             const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' } // Préférer la caméra arrière sur mobile
-            })
-            setStream(mediaStream)
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream
-            }
-            setIsActive(true)
+                video: { 
+                    facingMode: 'environment', // Caméra arrière
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            setStream(mediaStream);
+            setIsActive(true);
         } catch (err: any) {
-            console.error("Erreur d'accès à la caméra:", err)
-            setError("Impossible d'accéder à la caméra. Veuillez vérifier les permissions.")
+            console.error("Erreur d'accès à la caméra:", err);
+            // Fallback si 'environment' échoue (certains navigateurs desktop)
+            try {
+                const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                setStream(fallbackStream);
+                setIsActive(true);
+            } catch (fallbackErr) {
+                setError("Impossible d'accéder à la caméra. Vérifiez les permissions HTTPS.");
+            }
         }
-    }, [])
+    }, []);
 
     const stopCamera = useCallback(() => {
         if (stream) {

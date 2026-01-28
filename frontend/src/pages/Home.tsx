@@ -78,11 +78,11 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
-                    className="w-full text-center mb-4 -mt-8 space-y-4"
+                    className="w-full text-center mb-4 -mt-6 space-y-4"
                 >
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none">
+                    <h1 className="text-4xl md:text-8xl font-black tracking-tighter leading-none">
                         <span className="bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
-                            Chien&nbsp; vs &nbsp;Chat
+                            Chien vs Chat
                         </span>
                     </h1>
                     {/* <p className="text-sm md:text-lg text-muted-foreground max-w-md mx-auto leading-relaxed font-medium">
