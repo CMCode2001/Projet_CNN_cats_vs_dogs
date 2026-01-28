@@ -31,9 +31,9 @@ export function VirtualGallery({ onSelect, isLoading }: VirtualGalleryProps) {
     return (
         <div className="w-full space-y-3">
             {/* <h3 className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] text-center lg:text-left lg:pl-1">
-                Test Express
+                Gallerie Test
             </h3> */}
-            <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
+            <div className="grid grid-cols-3 lg:grid-cols-1 gap-4">
                 {galleryImages.map((image, index) => (
                     <motion.div
                         key={index}

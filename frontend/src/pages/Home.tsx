@@ -5,8 +5,10 @@ import { PredictionCard } from '../components/PredictionCard'
 import type { PredictionResult } from '../components/PredictionCard'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { VirtualGallery } from '../components/VirtualGallery'
+import { CameraCard } from '../components/CameraCard'
 import { predictImage } from '../services/api.ts'
-import {AlertCircle } from 'lucide-react'
+import { AlertCircle, FileImage, Camera } from 'lucide-react'
+import { cn } from '../lib/utils'
 
 import {
     Dialog,
@@ -23,6 +25,7 @@ export default function Home() {
     const [prediction, setPrediction] = useState<PredictionResult | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [inputMode, setInputMode] = useState<"file" | "camera">("file")
 
 
     const handleImageSelect = async (file: File) => {
@@ -75,7 +78,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
-                    className="w-full text-center mb-8 space-y-4"
+                    className="w-full text-center mb-4 -mt-8 space-y-4"
                 >
                     <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none">
                         <span className="bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
@@ -88,20 +91,61 @@ export default function Home() {
                 </motion.header>
 
                 {/* Contenu Principal - Layout Grid Symétrique sur Desktop */}
-                <div className="w-full flex justify-center">
+                <div className="w-full flex flex-col items-center gap-8">
+                    {/* Mode Switcher - Centré au dessus quand on est en mode sélection */}
+                    <AnimatePresence>
+                        {!prediction && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="flex justify-center gap-4 p-1.5 bg-black/10 dark:bg-white/5 rounded-full w-fit mx-auto backdrop-blur-md border border-white/10"
+                            >
+                                <button
+                                    onClick={() => setInputMode("file")}
+                                    className={cn(
+                                        "flex items-center gap-2 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all",
+                                        inputMode === "file" 
+                                            ? "bg-primary text-primary-foreground shadow-lg" 
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    <FileImage size={14} />
+                                    Fichier
+                                </button>
+                                <button
+                                    onClick={() => setInputMode("camera")}
+                                    className={cn(
+                                        "flex items-center gap-2 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all",
+                                        inputMode === "camera" 
+                                            ? "bg-primary text-primary-foreground shadow-lg" 
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    <Camera size={14} />
+                                    Caméra
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <div className="w-full flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10">
-                        {/* Zone de Drag & Drop / Résultat */}
+                        {/* Zone d'Input ou de Résultat */}
                         <div className="w-full max-w-xl shrink-0">
                             <AnimatePresence mode="wait">
                                 {!prediction ? (
                                     <motion.div
-                                        key="upload"
+                                        key="input-section"
                                         initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.98 }}
                                         transition={{ type: "spring", stiffness: 200, damping: 25 }}
                                     >
-                                        <UploadCard onImageSelect={handleImageSelect} isUploading={isLoading} />
+                                        {inputMode === "file" ? (
+                                            <UploadCard onImageSelect={handleImageSelect} isUploading={isLoading} />
+                                        ) : (
+                                            <CameraCard onImageSelect={handleImageSelect} isUploading={isLoading} />
+                                        )}
                                     </motion.div>
                                 ) : (
                                     <motion.div
@@ -122,7 +166,7 @@ export default function Home() {
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="w-full max-w-lg lg:w-32 lg:pt-2"
+                            className="w-full max-w-lg lg:w-32"
                         >
                             <VirtualGallery onSelect={handleImageSelect} isLoading={isLoading} />
                         </motion.div>
