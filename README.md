@@ -6,8 +6,7 @@
 Une application web moderne et ultra-performante utilisant le Deep Learning pour classifier instantanément les images de chiens et de chats. Ce projet a été développé dans le cadre du projet Deep Learning du **Master 2 GL UIDT**.
 
 ---
-![alt text](image.png)
-
+![alt text](image-Photoroom.png)
 ---
 ## 🌟 Fonctionnalités
 
