@@ -48,7 +48,7 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen relative flex flex-col items-center p-4 md:p-8 overflow-x-hidden">
+        <div className="relative flex flex-col items-center w-full p-4 md:p-8">
             {/* Background Elements */}
             <div className="absolute inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-gray-500/20 rounded-full blur-[80px] md:blur-[120px] animate-pulse" />

@@ -100,15 +100,35 @@
 }
 
 @layer base {
-  * {
-    border-color: hsl(var(--border));
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
   }
+
+  html {
+    overflow-y: hidden; /* Empêche le scroll sur html */
+  }
+
   body {
-    @apply bg-background text-foreground antialiased transition-colors duration-300 min-h-screen selection:bg-primary selection:text-primary-foreground;
+    @apply bg-background text-foreground antialiased transition-colors duration-300 selection:bg-primary selection:text-primary-foreground;
+    overflow-y: auto; /* Autorise le scroll uniquement sur body */
+    min-height: 100%;
     background-image: 
       radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
       radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
       radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+  }
+
+  #root {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  * {
+    border-color: hsl(var(--border));
   }
   .dark body {
     background-image: 
