@@ -7,7 +7,8 @@ Une application web moderne et ultra-performante utilisant le Deep Learning pour
 
 ---
 ![alt text](image-Photoroom.png)
-Disponible ici -> **``` https://projet-cnn-cats-vs-dogs-1.onrender.com/ ```**
+[🌐 Démo – CNN Cats vs Dogs](https://projet-cnn-cats-vs-dogs-1.onrender.com/)
+
 ---
 ## 🌟 Fonctionnalités
 
