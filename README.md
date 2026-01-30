@@ -27,6 +27,9 @@ Une application web moderne et ultra-performante utilisant le Deep Learning pour
 - **Framework** : FastAPI (Python 3.11)
 - **Modèle** : Réseau de neurones convolutif (CNN) via TensorFlow/Keras.
 - **Prétraitement** : Optimisation des images à la volée avant prédiction.
+- 1. Nettoyage des fichiers corrompus (clean_data.py)
+- 2. Redimensionnement et normalisation des images (train.py)
+- 3. Data augmentation pour le jeu d’entraînement
 - **CORS** : Entièrement configuré pour les déploiements multi-origines.
 
 ### Frontend (Application Web)
@@ -37,6 +40,30 @@ Une application web moderne et ultra-performante utilisant le Deep Learning pour
 - **Caméra** : Intégration robuste avec `react-webcam`.
 
 ---
+## 📂 Structure du projet
+dogs-cats-classifier/
+│
+├── backend/
+│   ├── api/                  # Endpoints FastAPI
+│   ├── model/                # Modèle CNN et scripts d'entraînement
+│   │   └── model.keras       # Repertoire de Sauvegarde du modele 
+│   ├── training/        
+│   │   └── clean_data.py     # Nettoyage des images corrompues
+│   │   └── train.py          # Prétraitement + entraînement + évaluation
+│   ├── requirements.txt      
+│   └── main.py               # Point d'entrée backend
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # Composants UI (Drag & Drop, Caméra, Galerie)
+│   │   ├── pages/            # Pages principales
+│   │   └── App.tsx           
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── docker-compose.yml
+└── README.md
+
 
 ## 🚀 Installation Locale
 
@@ -53,13 +80,16 @@ docker-compose up --build
 ```
 L'application sera accessible sur `http://localhost`.
 
-### 3. Installation manuelle (Sans Docker)
-
+### 3. Installation manuelle (Sans Docker) et exécution
+### a. Entrer dans le dossier du projet et vous y trouverez deux repertoire /backend et /frontend
+```bash
+cd dogs-cats-classifier
+```
 **Backend :**
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # Sur Windows: venv\Scripts\activate
+python -m venv venv      # Sur Windows: venv\Scripts\activate
+source venv/bin/activate  # Env avec Python 3.11.4 pour plus de compatibilité
 pip install -r requirements.txt
 uvicorn api.api:app --reload
 ```
@@ -70,7 +100,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
 
 ---
 
