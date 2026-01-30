@@ -41,6 +41,7 @@ Une application web moderne et ultra-performante utilisant le Deep Learning pour
 
 ---
 ## 📂 Structure du projet
+```bash
 dogs-cats-classifier/
 │
 ├── backend/
@@ -63,7 +64,7 @@ dogs-cats-classifier/
 │
 ├── docker-compose.yml
 └── README.md
-
+```
 
 ## 🚀 Installation Locale
 
